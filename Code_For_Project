@@ -1,0 +1,39 @@
+library(readr)
+library(fastDummies)
+Term_Paper_Data_ALL <- read_csv("Term Paper Data - ALL.csv")
+View(Term_Paper_Data_ALL)
+
+##name variables
+names(Term_Paper_Data_ALL) <- c("Name", "Rank", "Salary", "Years", "Field", "JobOutlook", "Gender", "SalOutside")
+
+##create dummy variables for Rank (Asistant Prof, Prof, etc) and Field (Econ, Fin, Accting, etc)
+test = fastDummies::dummy_cols(Term_Paper_Data_ALL, select_columns = c("Rank","Field"))
+
+##create dummy variable for Gender and add to dataframe
+GenDummy = as.numeric(Term_Paper_Data_ALL$Gender == "M")
+print(GenDummy)
+NEWDATA = cbind(Term_Paper_Data_ALL, GenDummy)
+
+##create variable for natural log of salary
+lsal=log(Term_Paper_Data_ALL$Salary)
+
+
+##regression model with all relevant variables log of salary ~ Gender + Years Worked + Rank + Field 
+model4 <- lm(NEWDATA$lsal ~ GenDummy + NEWDATA$Years + 
+       NEWDATA$Rank_Instructor + NEWDATA$`Rank_Assistant Professor` + 
+       NEWDATA$`Rank_Associate Professor` + NEWDATA$Rank_Professor + 
+       NEWDATA$Field_Accounting + NEWDATA$Field_Anthropology + NEWDATA$Field_CIS + 
+       NEWDATA$`Field_Communication Studies` + NEWDATA$Field_Economics + 
+       NEWDATA$Field_English + NEWDATA$Field_Finance + NEWDATA$`Field_Foreign Language` + 
+       NEWDATA$`Field_International Business` + NEWDATA$`Field_Justice Studies` + 
+       NEWDATA$Field_Management + NEWDATA$Field_Marketing + NEWDATA$Field_Philosophy + 
+       NEWDATA$`Field_Political Science` + NEWDATA$Field_Religion + 
+       NEWDATA$Field_SMAD + NEWDATA$Field_Sociology + NEWDATA$`Field_Writing, Rhetoric & Tech Comm`)
+sum1 <- summary(model4)
+install.packages("sjPlot")
+install.packages("sjlabelled")
+install.packages("sjmisc")
+library(sjPlot)
+library(sjmisc)
+library(sjlabelled)
+tab_model(model4)
